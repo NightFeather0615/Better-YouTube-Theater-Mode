@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Better YouTube Theater Mode
 // @namespace         https://github.com/NightFeather0615
-// @version           1.3.0
+// @version           1.3.1
 // @description       Make YouTube's theater mode work like Twitch's one
 // @author            NightFeather
 // @match             *://www.youtube.com/*
@@ -49,9 +49,12 @@ const asyncSleep = async (ms) => {
 
         let videoBleedContainer = await waitElement("#full-bleed-container");
         let videoBleedContainerObserver = new ResizeObserver(() => {
+            let isTheaterView = document.querySelector("#masthead").theater;
+
             if (window.location.pathname !== "/watch" || videoBleedContainer.clientHeight === 0) {
-                console.log(`[YT Better Theater Mode] Applying mashhead fix`);
                 mashheadContainer.hidden = false;
+            } else if (isTheaterView && isPlayerSetup && videoBleedContainer.clientHeight > 0) {
+                mashheadContainer.hidden = true;
             }
         })
         videoBleedContainerObserver.observe(videoBleedContainer);
