@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Better YouTube Theater Mode
 // @namespace         https://github.com/NightFeather0615
-// @version           1.2.0
+// @version           1.3.0
 // @description       Make YouTube's theater mode work like Twitch's one
 // @author            NightFeather
 // @match             *://www.youtube.com/*
@@ -38,12 +38,7 @@ const asyncSleep = async (ms) => {
     let isPlayerSetup = false;
 
     const trySetupPlayer = async () => {
-        if (isPlayerSetup) return;
-
-        if (window.location.pathname !== "/watch") {
-            console.log(`[YT Better Theater Mode] URL pathname invalid`);
-            return;
-        }
+        if (window.location.pathname !== "/watch" || isPlayerSetup) return;
 
         isPlayerSetup = true;
 
@@ -51,7 +46,16 @@ const asyncSleep = async (ms) => {
 
         let mashheadContainer = await waitElement("#masthead-container");
         let pageManager = await waitElement("#page-manager");
+
         let videoBleedContainer = await waitElement("#full-bleed-container");
+        let videoBleedContainerObserver = new ResizeObserver(() => {
+            if (window.location.pathname !== "/watch" || videoBleedContainer.clientHeight === 0) {
+                console.log(`[YT Better Theater Mode] Applying mashhead fix`);
+                mashheadContainer.hidden = false;
+            }
+        })
+        videoBleedContainerObserver.observe(videoBleedContainer);
+
         let liveChat = document.querySelector("#chat");
 
         console.log(`[YT Better Theater Mode] Video player initialized`);
@@ -59,14 +63,16 @@ const asyncSleep = async (ms) => {
         const processTheaterMode = async () => {
             await asyncSleep(50);
 
-            let isTheaterView = document.getElementById("masthead")?.getAttribute("theater")?.length >= 0;
+            let isTheaterView = document.querySelector("#masthead").theater;
 
             if (isTheaterView) {
-                console.log(`[YT Better Theater Mode] Applying styles`);
+                console.log(`[YT Better Theater Mode] Applying player styles`);
+
+                mashheadContainer.hidden = true;
 
                 videoBleedContainer.style.maxHeight = "100vh";
                 videoBleedContainer.style.height = "100vh";
-                mashheadContainer.hidden = true;
+
                 pageManager.style.marginTop = "0px";
 
                 if (liveChat) {
@@ -74,11 +80,13 @@ const asyncSleep = async (ms) => {
                     liveChat.style.borderRadius = "0 0 0 0";
                 }
             } else {
-                console.log(`[YT Better Theater Mode] Resetting styles`);
+                console.log(`[YT Better Theater Mode] Resetting player styles`);
+
+                mashheadContainer.hidden = false;
 
                 videoBleedContainer.style.maxHeight = "";
                 videoBleedContainer.style.height = "";
-                mashheadContainer.hidden = false;
+
                 pageManager.style.marginTop = "var(--ytd-masthead-height,var(--ytd-toolbar-height))";
 
                 if (liveChat) {
@@ -86,7 +94,7 @@ const asyncSleep = async (ms) => {
                 }
             }
 
-            console.log(`[YT Better Theater Mode] Triggering resize event`);
+            console.log(`[YT Better Theater Mode] Triggering player resize event`);
             let resizeEvent = window.document.createEvent("UIEvents");
             resizeEvent.initUIEvent("resize", true, false, window, 0);
             window.dispatchEvent(resizeEvent);
