@@ -6,4 +6,4 @@ Make YouTube's theater mode work like Twitch's
 
 ## Preview
 
-![screenshot](/img/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/NightFeather0615/Better-YouTube-Theater-Mode/main/img/screenshot.png)
