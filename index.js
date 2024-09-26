@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Better YouTube Theater Mode
 // @namespace         https://github.com/NightFeather0615
-// @version           1.3.2
+// @version           1.3.3
 // @description       Make YouTube's theater mode work like Twitch's one
 // @author            NightFeather
 // @match             *://www.youtube.com/*
@@ -48,18 +48,8 @@ const asyncSleep = async (ms) => {
         let pageManager = await waitElement("#page-manager");
 
         let videoBleedContainer = await waitElement("#full-bleed-container");
-        let videoBleedContainerObserver = new ResizeObserver(() => {
-            let isTheaterView = document.querySelector("#masthead").theater;
 
-            if (window.location.pathname !== "/watch" || videoBleedContainer.clientHeight === 0) {
-                mashheadContainer.hidden = false;
-                pageManager.style.marginTop = "var(--ytd-masthead-height,var(--ytd-toolbar-height))";
-            } else if (isTheaterView && isPlayerSetup && videoBleedContainer.clientHeight > 0) {
-                mashheadContainer.hidden = true;
-                pageManager.style.marginTop = "0px";
-            }
-        })
-        videoBleedContainerObserver.observe(videoBleedContainer);
+        let moviePlayer = await waitElement("#movie_player");
 
         let liveChat = document.querySelector("#chat");
 
@@ -70,13 +60,15 @@ const asyncSleep = async (ms) => {
 
             let isTheaterView = document.querySelector("#masthead").theater;
 
-            if (isTheaterView) {
-                console.log(`[YT Better Theater Mode] Applying player styles`);
+            if (isTheaterView && videoBleedContainer.clientHeight > 0 && window.location.pathname === "/watch") {
+                console.log(`[YT Better Theater Mode] Applying styles`);
 
                 mashheadContainer.hidden = true;
 
                 videoBleedContainer.style.maxHeight = "100vh";
                 videoBleedContainer.style.height = "100vh";
+
+                moviePlayer.classList.remove("ytp-hide-info-bar");
 
                 pageManager.style.marginTop = "0px";
 
@@ -85,12 +77,16 @@ const asyncSleep = async (ms) => {
                     liveChat.style.borderRadius = "0 0 0 0";
                 }
             } else {
-                console.log(`[YT Better Theater Mode] Resetting player styles`);
+                console.log(`[YT Better Theater Mode] Resetting styles`);
 
                 mashheadContainer.hidden = false;
 
                 videoBleedContainer.style.maxHeight = "";
                 videoBleedContainer.style.height = "";
+
+                if (!moviePlayer.classList.contains("ytp-fullscreen")) {
+                    moviePlayer.classList.add("ytp-hide-info-bar");
+                }
 
                 pageManager.style.marginTop = "var(--ytd-masthead-height,var(--ytd-toolbar-height))";
 
@@ -99,7 +95,7 @@ const asyncSleep = async (ms) => {
                 }
             }
 
-            console.log(`[YT Better Theater Mode] Triggering player resize event`);
+            console.log(`[YT Better Theater Mode] Triggering resize event`);
             let resizeEvent = window.document.createEvent("UIEvents");
             resizeEvent.initUIEvent("resize", true, false, window, 0);
             window.dispatchEvent(resizeEvent);
@@ -108,6 +104,9 @@ const asyncSleep = async (ms) => {
         console.log(`[YT Better Theater Mode] Setting up theater mode`);
 
         await processTheaterMode();
+
+        let videoBleedContainerObserver = new ResizeObserver(processTheaterMode)
+        videoBleedContainerObserver.observe(videoBleedContainer);
 
         theaterBtn.onclick = processTheaterMode;
     }
