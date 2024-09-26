@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Better YouTube Theater Mode
 // @namespace         https://github.com/NightFeather0615
-// @version           1.3.4
+// @version           1.3.5
 // @description       Make YouTube's theater mode work like Twitch's one
 // @author            NightFeather
 // @match             *://www.youtube.com/*
@@ -112,5 +112,4 @@ const asyncSleep = async (ms) => {
 
     await trySetupPlayer();
     document.addEventListener("selectionchange", trySetupPlayer);
-    window.addEventListener("popstate", trySetupPlayer);
 })();
