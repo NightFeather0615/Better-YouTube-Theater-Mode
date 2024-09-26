@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Better YouTube Theater Mode
 // @namespace         https://github.com/NightFeather0615
-// @version           1.3.3
+// @version           1.3.4
 // @description       Make YouTube's theater mode work like Twitch's one
 // @author            NightFeather
 // @match             *://www.youtube.com/*
@@ -45,13 +45,10 @@ const asyncSleep = async (ms) => {
         let theaterBtn = await waitElement(".ytp-size-button.ytp-button");
 
         let mashheadContainer = await waitElement("#masthead-container");
-        let pageManager = await waitElement("#page-manager");
+        let pageManager = await waitElement("ytd-page-manager");
 
         let videoBleedContainer = await waitElement("#full-bleed-container");
-
         let moviePlayer = await waitElement("#movie_player");
-
-        let liveChat = document.querySelector("#chat");
 
         console.log(`[YT Better Theater Mode] Video player initialized`);
 
@@ -59,6 +56,8 @@ const asyncSleep = async (ms) => {
             await asyncSleep(50);
 
             let isTheaterView = document.querySelector("#masthead").theater;
+            let isFullscreen = moviePlayer.classList.contains("ytp-fullscreen");
+            let liveChat = document.querySelector("ytd-live-chat-frame");
 
             if (isTheaterView && videoBleedContainer.clientHeight > 0 && window.location.pathname === "/watch") {
                 console.log(`[YT Better Theater Mode] Applying styles`);
@@ -84,7 +83,7 @@ const asyncSleep = async (ms) => {
                 videoBleedContainer.style.maxHeight = "";
                 videoBleedContainer.style.height = "";
 
-                if (!moviePlayer.classList.contains("ytp-fullscreen")) {
+                if (!isFullscreen) {
                     moviePlayer.classList.add("ytp-hide-info-bar");
                 }
 
@@ -113,4 +112,5 @@ const asyncSleep = async (ms) => {
 
     await trySetupPlayer();
     document.addEventListener("selectionchange", trySetupPlayer);
+    window.addEventListener("popstate", trySetupPlayer);
 })();
