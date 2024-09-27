@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Better YouTube Theater Mode
 // @namespace         https://github.com/NightFeather0615
-// @version           1.3.5
+// @version           1.3.6
 // @description       Make YouTube's theater mode work like Twitch's one
 // @author            NightFeather
 // @match             *://www.youtube.com/*
@@ -48,6 +48,8 @@ const asyncSleep = async (ms) => {
         let pageManager = await waitElement("ytd-page-manager");
 
         let videoBleedContainer = await waitElement("#full-bleed-container");
+        let lastPlayerHeight = -1;
+
         let moviePlayer = await waitElement("#movie_player");
 
         console.log(`[YT Better Theater Mode] Video player initialized`);
@@ -60,6 +62,8 @@ const asyncSleep = async (ms) => {
             let liveChat = document.querySelector("ytd-live-chat-frame");
 
             if (isTheaterView && videoBleedContainer.clientHeight > 0 && window.location.pathname === "/watch") {
+                if (videoBleedContainer.clientHeight === lastPlayerHeight) return;
+
                 console.log(`[YT Better Theater Mode] Applying styles`);
 
                 mashheadContainer.hidden = true;
@@ -76,6 +80,8 @@ const asyncSleep = async (ms) => {
                     liveChat.style.borderRadius = "0 0 0 0";
                 }
             } else {
+                if (videoBleedContainer.clientHeight === 0) return;
+
                 console.log(`[YT Better Theater Mode] Resetting styles`);
 
                 mashheadContainer.hidden = false;
@@ -98,6 +104,8 @@ const asyncSleep = async (ms) => {
             let resizeEvent = window.document.createEvent("UIEvents");
             resizeEvent.initUIEvent("resize", true, false, window, 0);
             window.dispatchEvent(resizeEvent);
+
+            lastPlayerHeight = videoBleedContainer.clientHeight;
         }
 
         console.log(`[YT Better Theater Mode] Setting up theater mode`);
