@@ -1,4 +1,4 @@
-# Better-YouTube-Theater-Mode
+# [Better YouTube Theater Mode](https://github.com/NightFeather0615/Better-YouTube-Theater-Mode)
 Make YouTube's theater mode work like Twitch's
 
 ## Install
