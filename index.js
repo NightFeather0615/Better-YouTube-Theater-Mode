@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name              Better YouTube Theater Mode
 // @namespace         https://github.com/NightFeather0615
-// @version           1.3.6
+// @version           1.3.7
 // @description       Make YouTube's theater mode work like Twitch's one
 // @author            NightFeather
 // @match             *://www.youtube.com/*
@@ -38,7 +38,9 @@ const asyncSleep = async (ms) => {
     let isPlayerSetup = false;
 
     const trySetupPlayer = async () => {
-        if (window.location.pathname !== "/watch" || isPlayerSetup) return;
+        let isUrlVaild = window.location.pathname.startsWith("/watch") || window.location.pathname.startsWith("/live");
+
+        if (!isUrlVaild || isPlayerSetup) return;
 
         isPlayerSetup = true;
 
@@ -61,7 +63,7 @@ const asyncSleep = async (ms) => {
             let isFullscreen = moviePlayer.classList.contains("ytp-fullscreen");
             let liveChat = document.querySelector("ytd-live-chat-frame");
 
-            if (isTheaterView && videoBleedContainer.clientHeight > 0 && window.location.pathname === "/watch") {
+            if (isTheaterView && videoBleedContainer.clientHeight > 0 && isUrlVaild) {
                 if (videoBleedContainer.clientHeight === lastPlayerHeight) return;
 
                 console.log(`[YT Better Theater Mode] Applying styles`);
@@ -112,7 +114,7 @@ const asyncSleep = async (ms) => {
 
         await processTheaterMode();
 
-        let videoBleedContainerObserver = new ResizeObserver(processTheaterMode)
+        let videoBleedContainerObserver = new ResizeObserver(processTheaterMode);
         videoBleedContainerObserver.observe(videoBleedContainer);
 
         theaterBtn.onclick = processTheaterMode;
